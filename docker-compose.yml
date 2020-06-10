@@ -1,0 +1,28 @@
+version: "3.1"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 8888:15672
+  producer:
+    build: '.'
+    depends_on: ["rabbitmq"]
+    networks:
+      - rmq
+    environment:
+      RMQ_HOSTNAME: "rabbitmq"
+      RMQ_PRODUCER: "true"
+  consumer:
+    build: '.'
+    depends_on: ["rabbitmq","producer"]
+    networks:
+      - rmq
+    environment:
+      RMQ_HOSTNAME: "rabbitmq"
+      RMQ_CONSUMER: "true"
+
+networks:
+  rmq:
+    driver: bridge

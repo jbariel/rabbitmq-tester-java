@@ -2,6 +2,7 @@ package com.barielinc.cloud.rabbitmq;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -123,18 +124,34 @@ public class RabbitMQTester {
 
 			props.setUsername(StringUtils.trimToEmpty(propfile.getProperty("username")));
 			props.setPassword(StringUtils.trimToEmpty(propfile.getProperty("password")));
-			props.setPort(NumberUtils.toInt(propfile.getProperty("port", "5672")));
+			props.setPort(NumberUtils.toInt(propfile.getProperty("port"), props.getPort()));
 			props.setHostname(StringUtils.trimToEmpty(propfile.getProperty("hostname", "localhost")));
 			props.setvHost(StringUtils.trimToEmpty(propfile.getProperty("vhost")));
-			props.setProducer(Boolean.parseBoolean(StringUtils.trimToEmpty(propfile.getProperty("producer", "false"))));
-			props.setConsumer(Boolean.parseBoolean(StringUtils.trimToEmpty(propfile.getProperty("consumer", "false"))));
-			props.setNumberOfConsumers(NumberUtils.toInt(propfile.getProperty("numberOfConsumers", "1")));
-			props.setProducerMessageRate(NumberUtils.toLong(propfile.getProperty("producerMessageRate", "1000L")));
+			props.setProducer(Boolean.parseBoolean(StringUtils.trimToEmpty(propfile.getProperty("producer"))));
+			props.setConsumer(Boolean.parseBoolean(StringUtils.trimToEmpty(propfile.getProperty("consumer"))));
+			props.setNumberOfConsumers(
+					NumberUtils.toInt(propfile.getProperty("numberOfConsumers"), props.getNumberOfConsumers()));
+			props.setProducerMessageRate(
+					NumberUtils.toLong(propfile.getProperty("producerMessageRate"), props.getProducerMessageRate()));
 
 		} catch (IOException e) {
 			log.error("Exception loading properties file");
 			e.printStackTrace();
 		}
+
+		Map<String, String> env = System.getenv();
+
+		props.setUsername(env.getOrDefault("RMQ_USERNAME", props.getUsername()));
+		props.setPassword(env.getOrDefault("RMQ_PASSWORD", props.getPassword()));
+		props.setvHost(env.getOrDefault("RMQ_VHOST", props.getvHost()));
+		props.setHostname(env.getOrDefault("RMQ_HOSTNAME", props.getHostname()));
+		props.setPort(NumberUtils.toInt(env.getOrDefault("RMQ_PORT", String.valueOf(props.getPort()))));
+		props.setProducer(Boolean.valueOf(env.getOrDefault("RMQ_PRODUCER", String.valueOf(props.isProducer()))));
+		props.setConsumer(Boolean.valueOf(env.getOrDefault("RMQ_CONSUMER", String.valueOf(props.isConsumer()))));
+		props.setNumberOfConsumers(
+				NumberUtils.toInt(env.getOrDefault("RMQ_NUM_CONSUMERS", String.valueOf(props.getNumberOfConsumers()))));
+		props.setProducerMessageRate(NumberUtils
+				.toLong(env.getOrDefault("RMQ_MESSAGE_RATE", String.valueOf(props.getProducerMessageRate()))));
 
 		log.info("Found properties: %s", props);
 		return props;

@@ -1,30 +1,22 @@
 package com.barielinc.cloud.rabbitmq;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 public class RMQProperties {
 
-	private String username;
-	private String password;
-	private String vHost;
-	private String hostname;
-	private int port;
-	private boolean isProducer;
-	private boolean isConsumer;
-	private int numberOfConsumers;
-	private long producerMessageRate;
+	private String username = StringUtils.EMPTY;
+	private String password = StringUtils.EMPTY;
+	private String vHost = StringUtils.EMPTY;
+	private String hostname = "localhost";
+	private int port = 5672;
+	private boolean isProducer = false;
+	private boolean isConsumer = false;
+	private int numberOfConsumers = 1;
+	private long producerMessageRate = 1000L;
 
 	public RMQProperties() {
 		super();
-	}
-
-	public RMQProperties(String username, String password, String vHost, String hostname, int port) {
-		this();
-		setUsername(username);
-		setPassword(password);
-		setvHost(vHost);
-		setHostname(hostname);
-		setPort(port);
 	}
 
 	public String getUsername() {
