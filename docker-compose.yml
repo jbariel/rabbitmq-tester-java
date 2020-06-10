@@ -6,23 +6,46 @@ services:
     ports:
       - 5672:5672
       - 8888:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "pass"
+      #RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit loopback_users none"
+    networks:
+      - rmq
+    volumes:
+      - "rmq:/var/lib/rabbitmq"
   producer:
     build: '.'
     depends_on: ["rabbitmq"]
+    stdin_open: true
+    tty: true
     networks:
       - rmq
     environment:
       RMQ_HOSTNAME: "rabbitmq"
+      RMQ_VHOST: "/"
+      RMQ_USERNAME: "user"
+      RMQ_PASSWORD: "pass"
       RMQ_PRODUCER: "true"
+      RMQ_INITIAL_DELAY: 10000
   consumer:
     build: '.'
     depends_on: ["rabbitmq","producer"]
+    stdin_open: true
+    tty: true
     networks:
       - rmq
     environment:
       RMQ_HOSTNAME: "rabbitmq"
+      RMQ_VHOST: "/"
+      RMQ_USERNAME: "user"
+      RMQ_PASSWORD: "pass"
       RMQ_CONSUMER: "true"
+      RMQ_INITIAL_DELAY: 10000
 
 networks:
   rmq:
     driver: bridge
+
+volumes:
+  rmq:

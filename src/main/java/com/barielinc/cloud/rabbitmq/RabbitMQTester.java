@@ -25,6 +25,15 @@ public class RabbitMQTester {
 
 		RMQProperties properties = loadProperties();
 
+		long initDelay = properties.getInitialDelay();
+		try {
+			log.info("Found initial delay of " + initDelay + " ms, sleeping...");
+			Thread.sleep(initDelay);
+			log.info("Continuing initialization...");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		doProduce = properties.isProducer();
 		doConsume = properties.isConsumer();
 
@@ -119,7 +128,7 @@ public class RabbitMQTester {
 
 		Properties propfile = new Properties();
 
-		try (InputStream input = RabbitMQTester.class.getResourceAsStream("props.properties")) {
+		try (InputStream input = RabbitMQTester.class.getClassLoader().getResourceAsStream("props.properties")) {
 			propfile.load(input);
 
 			props.setUsername(StringUtils.trimToEmpty(propfile.getProperty("username")));
@@ -133,6 +142,7 @@ public class RabbitMQTester {
 					NumberUtils.toInt(propfile.getProperty("numberOfConsumers"), props.getNumberOfConsumers()));
 			props.setProducerMessageRate(
 					NumberUtils.toLong(propfile.getProperty("producerMessageRate"), props.getProducerMessageRate()));
+			props.setInitialDelay(NumberUtils.toLong(propfile.getProperty("initialDelay"), props.getInitialDelay()));
 
 		} catch (IOException e) {
 			log.error("Exception loading properties file");
@@ -152,8 +162,10 @@ public class RabbitMQTester {
 				NumberUtils.toInt(env.getOrDefault("RMQ_NUM_CONSUMERS", String.valueOf(props.getNumberOfConsumers()))));
 		props.setProducerMessageRate(NumberUtils
 				.toLong(env.getOrDefault("RMQ_MESSAGE_RATE", String.valueOf(props.getProducerMessageRate()))));
+		props.setInitialDelay(
+				NumberUtils.toLong(env.getOrDefault("RMQ_INITIAL_DELAY", String.valueOf(props.getInitialDelay()))));
 
-		log.info("Found properties: %s", props);
+		log.info(String.format("Found properties: %s", props));
 		return props;
 	}
 

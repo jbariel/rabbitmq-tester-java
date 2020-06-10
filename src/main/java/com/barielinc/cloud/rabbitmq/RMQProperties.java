@@ -14,6 +14,7 @@ public class RMQProperties {
 	private boolean isConsumer = false;
 	private int numberOfConsumers = 1;
 	private long producerMessageRate = 1000L;
+	private long initialDelay = 1000L;
 
 	public RMQProperties() {
 		super();
@@ -89,6 +90,14 @@ public class RMQProperties {
 
 	public void setProducerMessageRate(long producerMessageRate) {
 		this.producerMessageRate = producerMessageRate;
+	}
+
+	public long getInitialDelay() {
+		return initialDelay;
+	}
+
+	public void setInitialDelay(long initialDelay) {
+		this.initialDelay = initialDelay;
 	}
 
 	@Override
