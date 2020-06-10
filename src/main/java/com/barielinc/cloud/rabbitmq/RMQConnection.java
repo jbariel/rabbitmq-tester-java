@@ -7,7 +7,12 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class RMQConnection {
+
+	protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	protected Connection currentConnection;
 	protected Channel currentChannel;
@@ -35,7 +40,7 @@ public abstract class RMQConnection {
 			try {
 				currentChannel.close();
 			} catch (TimeoutException e) {
-				Out.w("Timed out closing channel...");
+				log.warn("Timed out closing channel...");
 				e.printStackTrace();
 			}
 		}
@@ -79,7 +84,7 @@ public abstract class RMQConnection {
 			// } catch (KeyManagementException | NoSuchAlgorithmException |
 			// URISyntaxException e) {
 		} catch (Exception e) {
-			Out.e("Error setting up ConnectionFactory with URI...");
+			log.error("Error setting up ConnectionFactory with URI...");
 			e.printStackTrace();
 		}
 		return factory;
@@ -92,7 +97,7 @@ public abstract class RMQConnection {
 			currentConnection = factory.newConnection();
 			currentChannel = currentConnection.createChannel();
 		} catch (TimeoutException e) {
-			Out.e("Creating connection timed out...");
+			log.error("Creating connection timed log...");
 			e.printStackTrace();
 		}
 	}

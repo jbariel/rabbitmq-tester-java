@@ -1,6 +1,7 @@
 package com.barielinc.cloud.rabbitmq;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -27,9 +28,9 @@ public class RMQProducer extends RMQConnection {
 			public void run() {
 				try {
 					currentChannel.basicPublish(exchangeName, routingKey, null,
-							String.format("[%s] Test Message", Out.dateTimeAsString()).getBytes());
+							String.format("[%s] Test Message", ZonedDateTime.now()).getBytes());
 				} catch (IOException e) {
-					Out.e("Error publishing message");
+					log.error("Error publishing message");
 					e.printStackTrace();
 				}
 

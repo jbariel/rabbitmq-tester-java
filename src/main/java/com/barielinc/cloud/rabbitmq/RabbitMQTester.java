@@ -1,6 +1,5 @@
 package com.barielinc.cloud.rabbitmq;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -8,10 +7,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-
-import com.barielinc.cloud.rabbitmq.Out.LogLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RabbitMQTester {
+
+	private final static Logger log = LoggerFactory.getLogger(RabbitMQTester.class);
 
 	public static ScheduledThreadPoolExecutor globalThreadPool = new ScheduledThreadPoolExecutor(10);
 
@@ -19,11 +20,10 @@ public class RabbitMQTester {
 	private static boolean doConsume = false;
 
 	public static void main(String[] args) {
-		Out.i("Starting...");
+		log.info("Starting...");
 
 		RMQProperties properties = loadProperties();
 
-		Out.setLogLevel(properties.getLogLevel());
 		doProduce = properties.isProducer();
 		doConsume = properties.isConsumer();
 
@@ -33,7 +33,7 @@ public class RabbitMQTester {
 		Thread consumer = null;
 
 		if (doProduce) {
-			Out.d("Creating producer...");
+			log.info("Creating producer...");
 			producer = new Thread(new Runnable() {
 
 				@Override
@@ -41,18 +41,18 @@ public class RabbitMQTester {
 					try {
 						rmqProducer.start();
 					} catch (IOException e) {
-						Out.e("Error starting RMQProducer");
+						log.error("Error starting RMQProducer");
 						e.printStackTrace();
 					}
 				}
 			});
-			Out.d("Starting producer...");
+			log.info("Starting producer...");
 			producer.start();
 		}
 
 		if (doConsume) {
 			// TODO jbariel => support more than 1 consumer
-			Out.d("Creating consumer...");
+			log.info("Creating consumer...");
 			consumer = new Thread(new Runnable() {
 
 				@Override
@@ -60,18 +60,18 @@ public class RabbitMQTester {
 					try {
 						rmqConsumer.start();
 					} catch (IOException e) {
-						Out.e("Error starting RQMConsumer");
+						log.error("Error starting RQMConsumer");
 						e.printStackTrace();
 					}
 				}
 			});
-			Out.d("Starting consumer...");
+			log.info("Starting consumer...");
 			consumer.start();
 		}
 
-		Out.i("Running...");
+		log.info("Running...");
 
-		Out.i("Press \"ENTER\" to continue...");
+		log.info("Press \"ENTER\" to continue...");
 		try {
 			System.in.read();
 		} catch (
@@ -80,13 +80,13 @@ public class RabbitMQTester {
 			e.printStackTrace();
 		}
 
-		Out.i("Closing down...");
+		log.info("Closing down...");
 
 		if (doProduce) {
 			try {
 				rmqProducer.stop();
 			} catch (IOException e) {
-				Out.w("IOException stopping producer!");
+				log.warn("IOException stopping producer!");
 				e.printStackTrace();
 			}
 
@@ -99,7 +99,7 @@ public class RabbitMQTester {
 			try {
 				rmqConsumer.stop();
 			} catch (IOException e) {
-				Out.w("IOException stopping consumer!");
+				log.warn("IOException stopping consumer!");
 				e.printStackTrace();
 			}
 
@@ -108,19 +108,17 @@ public class RabbitMQTester {
 			}
 		}
 
-		Out.i("Exiting...");
+		log.info("Exiting...");
 		System.exit(0);
 	}
 
 	private static RMQProperties loadProperties() {
-		Out.d("Loading properties...");
+		log.debug("Loading properties...");
 		RMQProperties props = new RMQProperties();
 
 		Properties propfile = new Properties();
-		InputStream input = null;
 
-		try {
-			input = new FileInputStream("props.properties");
+		try (InputStream input = RabbitMQTester.class.getResourceAsStream("props.properties")) {
 			propfile.load(input);
 
 			props.setUsername(StringUtils.trimToEmpty(propfile.getProperty("username")));
@@ -128,26 +126,17 @@ public class RabbitMQTester {
 			props.setPort(NumberUtils.toInt(propfile.getProperty("port", "5672")));
 			props.setHostname(StringUtils.trimToEmpty(propfile.getProperty("hostname", "localhost")));
 			props.setvHost(StringUtils.trimToEmpty(propfile.getProperty("vhost")));
-			props.setLogLevel(LogLevel.valueOf(StringUtils.trimToEmpty(propfile.getProperty("loglevel", "INFO"))));
 			props.setProducer(Boolean.parseBoolean(StringUtils.trimToEmpty(propfile.getProperty("producer", "false"))));
 			props.setConsumer(Boolean.parseBoolean(StringUtils.trimToEmpty(propfile.getProperty("consumer", "false"))));
 			props.setNumberOfConsumers(NumberUtils.toInt(propfile.getProperty("numberOfConsumers", "1")));
 			props.setProducerMessageRate(NumberUtils.toLong(propfile.getProperty("producerMessageRate", "1000L")));
 
 		} catch (IOException e) {
-			Out.e("Exception loading properties file");
+			log.error("Exception loading properties file");
 			e.printStackTrace();
-		} finally {
-			if (null != input) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					Out.w("Error closing input...");
-				}
-			}
 		}
 
-		Out.i("Found properties: %s", props);
+		log.info("Found properties: %s", props);
 		return props;
 	}
 

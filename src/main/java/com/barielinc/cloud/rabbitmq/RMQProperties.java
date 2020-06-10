@@ -2,8 +2,6 @@ package com.barielinc.cloud.rabbitmq;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-import com.barielinc.cloud.rabbitmq.Out.LogLevel;
-
 public class RMQProperties {
 
 	private String username;
@@ -11,7 +9,6 @@ public class RMQProperties {
 	private String vHost;
 	private String hostname;
 	private int port;
-	private LogLevel logLevel;
 	private boolean isProducer;
 	private boolean isConsumer;
 	private int numberOfConsumers;
@@ -68,14 +65,6 @@ public class RMQProperties {
 
 	public void setPort(int port) {
 		this.port = port;
-	}
-
-	public LogLevel getLogLevel() {
-		return logLevel;
-	}
-
-	public void setLogLevel(LogLevel logLevel) {
-		this.logLevel = logLevel;
 	}
 
 	public boolean isProducer() {
